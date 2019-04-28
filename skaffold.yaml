@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/gazataeon/test-jx-qs:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/gazataeon/test-jx-qs:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: test-jx-qs
+        chartPath: charts/test-jx-qs
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/gazataeon/test-jx-qs'
+          image.tag: '{{.DIGEST_HEX}}'
